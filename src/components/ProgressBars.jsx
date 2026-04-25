@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import useMealStore from '../store/useMealStore.js'
 
 const MACRO_CONFIG = [
@@ -16,8 +16,22 @@ function getBarClass(ratio) {
 
 export default function ProgressBars() {
   const targets = useMealStore((s) => s.targets)
-  const getTotals = useMealStore((s) => s.getTotals)
-  const totals = getTotals()
+  const recipes = useMealStore((s) => s.recipes)
+  const plan = useMealStore((s) => s.plan)
+
+  const totals = useMemo(() => {
+    let calories = 0, protein = 0, fats = 0, carbs = 0
+    for (const [recipeId, count] of Object.entries(plan)) {
+      const recipe = recipes.find((r) => r.id === recipeId)
+      if (recipe && count > 0) {
+        calories += recipe.calories * count
+        protein += recipe.protein * count
+        fats += recipe.fats * count
+        carbs += recipe.carbs * count
+      }
+    }
+    return { calories, protein, fats, carbs }
+  }, [recipes, plan])
 
   return (
     <div className="aero-glass p-4 md:p-5">

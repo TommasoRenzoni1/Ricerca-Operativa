@@ -1,9 +1,22 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import useMealStore from '../store/useMealStore.js'
 
 export default function DailyPlanSummary() {
-  const getPlanItems = useMealStore((s) => s.getPlanItems)
-  const items = getPlanItems()
+  const recipes = useMealStore((s) => s.recipes)
+  const plan = useMealStore((s) => s.plan)
+
+  const items = useMemo(() => {
+    const result = []
+    for (const [recipeId, count] of Object.entries(plan)) {
+      if (count > 0) {
+        const recipe = recipes.find((r) => r.id === recipeId)
+        if (recipe) {
+          result.push({ ...recipe, count })
+        }
+      }
+    }
+    return result
+  }, [recipes, plan])
 
   return (
     <div className="aero-glass p-4 h-full">
